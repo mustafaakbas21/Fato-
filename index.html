@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fatoş 🤍</title>
+    <style>
+        body {
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+        .container {
+            background-color: #313244;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 { 
+            color: #f38ba8; 
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        p { 
+            font-size: 1.2rem; 
+            line-height: 1.6; 
+            min-height: 150px;
+        }
+        .buttons { 
+            margin-top: 20px; 
+            position: relative; 
+            height: 80px; 
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        #btn-yes { 
+            background-color: #a6e3a1; 
+            color: #11111b; 
+        }
+        #btn-yes:hover {
+            transform: scale(1.1);
+        }
+        #btn-no { 
+            background-color: #f38ba8; 
+            color: #11111b; 
+            position: absolute; 
+            left: 55%;
+        }
+        .hidden { 
+            display: none !important; 
+        }
+        #success-msg { 
+            color: #a6e3a1; 
+            font-size: 1.5rem; 
+            margin-top: 20px; 
+            font-weight: bold; 
+            line-height: 1.5;
+        }
+        .heart {
+            color: #f38ba8;
+            font-size: 3rem;
+            animation: beat 1s infinite alternate;
+        }
+        @keyframes beat {
+            to { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-card">
+        <h1>Fatoş 🤍</h1>
+        <p id="typing-text"></p>
+        
+        <div class="buttons hidden" id="action-buttons">
+            <button id="btn-yes">Evet 🤍</button>
+            <button id="btn-no">Hayır</button>
+        </div>
+
+        <div id="success-msg" class="hidden">
+            <div class="heart">🤍</div>
+            Biliyordum!<br>
+            Seni çok seviyorum.<br>
+            Geleceğin en güzel, en harika sınıf öğretmeni sen olacaksın!
+        </div>
+    </div>
+
+    <script>
+        // Ekranda daktilo efektiyle yazılacak özür metni
+        const text = "Sevgilim, seni kırdığım için çok özür dilerim. Biliyorum, YKS maratonu zaten yeterince stresli ve hayallerine odaklandığın bu zorlu dönemde sana en büyük destekçi olmam gerekirken canını sıktım. Ama bilmeni isterim ki, tasarladığım hiçbir oyunun evreni sensiz anlamlı değil. Hayatımdaki en önemli 'main character' her zaman sensin. Lütfen bu aptal tasarımcıyı affet... Beni affediyor musun?";
+        
+        let i = 0;
+        const speed = 40; // Yazı yazma hızı (milisaniye)
+
+        function typeWriter() {
+            if (i < text.length) {
+                document.getElementById("typing-text").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, speed);
+            } else {
+                // Yazı bitince butonları göster
+                document.getElementById("action-buttons").classList.remove("hidden");
+            }
+        }
+
+        // Sayfa yüklendiğinde efekti başlat
+        window.onload = typeWriter;
+
+        const btnNo = document.getElementById("btn-no");
+        const btnYes = document.getElementById("btn-yes");
+        const actionButtons = document.getElementById("action-buttons");
+        const successMsg = document.getElementById("success-msg");
+
+        // "Hayır" butonundan kaçma animasyonu
+        btnNo.addEventListener("mouseover", () => {
+            const x = Math.random() * 200 - 100;
+            const y = Math.random() * 100 - 50;
+            btnNo.style.transform = `translate(${x}px, ${y}px)`;
+        });
+
+        // "Evet" butonuna tıklandığında olacaklar
+        btnYes.addEventListener("click", () => {
+            actionButtons.classList.add("hidden");
+            document.getElementById("typing-text").classList.add("hidden");
+            successMsg.classList.remove("hidden");
+        });
+    </script>
+</body>
+</html>
