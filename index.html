@@ -4,91 +4,347 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fatoş 🤍</title>
+    <!-- Google Fonts Entegrasyonu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            background-color: #1e1e2e;
-            color: #cdd6f4;
-            font-family: 'Courier New', Courier, monospace;
+            background: radial-gradient(circle at 50% 50%, #17112e 0%, #080512 100%);
+            color: #e0def4;
+            font-family: 'Outfit', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: flex-start; /* Mobil kaydırma ve padding için yukarıdan hizalama */
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* Dikey kaydırmayı aktif et */
             text-align: center;
+            position: relative;
+            padding: 30px 0; /* Üstten ve alttan boşluk */
         }
+        /* Partikül ve Parıltı Efektleri için Canvas */
+        #ambient-canvas {
+            position: fixed; /* Kaydırma yapıldığında ekranda sabit kalması için fixed yapıldı */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* Elit Glassmorphism Kart Düzeni */
         .container {
-            background-color: #313244;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 600px;
+            background: rgba(22, 17, 39, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px 30px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 
+                        0 0 50px rgba(243, 139, 168, 0.15),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            max-width: 520px;
             width: 90%;
+            z-index: 10;
+            position: relative;
+            margin: auto; /* Flex dikeyde ortalamayı sağlar, taşma durumunda kaydırır */
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .container:hover {
+            border-color: rgba(243, 139, 168, 0.2);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 
+                        0 0 60px rgba(243, 139, 168, 0.25),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        }
+        /* Sevimli Robot Konteyneri */
+        .robot-container {
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        #robot-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(243, 139, 168, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(243, 139, 168, 0.2);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.4s ease;
+            display: block;
+            margin: 0 auto;
+        }
+        .robot-container::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 10px;
+            background: radial-gradient(ellipse at center, rgba(243, 139, 168, 0.4) 0%, rgba(0,0,0,0) 70%);
+            filter: blur(3px);
+            z-index: -1;
+        }
+        .robot-container:hover #robot-img {
+            transform: scale(1.08) rotate(4deg);
+            border-color: rgba(243, 139, 168, 0.6);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 40px rgba(243, 139, 168, 0.45);
+        }
+        /* Başlık Tasarımı */
         h1 { 
-            color: #f38ba8; 
-            font-size: 2.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin-top: 0;
             margin-bottom: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff7597 0%, #cba6f7 50%, #f9e2af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+            letter-spacing: -0.5px;
         }
+        /* Daktilo Metin Tasarımı */
         p { 
-            font-size: 1.2rem; 
-            line-height: 1.6; 
-            min-height: 150px;
+            font-size: 1.12rem; 
+            line-height: 1.8; 
+            min-height: 140px;
+            font-weight: 300;
+            color: rgba(224, 222, 244, 0.9);
+            margin-bottom: 25px;
+            padding: 0 10px;
         }
+        /* Daktilo Cursor İşareti */
+        p:not(.finished)::after {
+            content: '❘';
+            animation: blink 0.8s infinite;
+            color: #ff7597;
+            margin-left: 3px;
+            font-weight: bold;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        /* Buton Grubu Konteyneri */
         .buttons { 
-            margin-top: 20px; 
+            margin-top: 25px; 
             position: relative; 
             height: 80px; 
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
             align-items: center;
         }
         button {
-            padding: 12px 30px;
+            padding: 13px 35px;
             font-size: 1.1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            outline: none;
         }
         #btn-yes { 
-            background-color: #a6e3a1; 
+            background: linear-gradient(135deg, #a6e3a1 0%, #89b4fa 100%); 
             color: #11111b; 
+            box-shadow: 0 4px 20px rgba(166, 227, 161, 0.3);
         }
         #btn-yes:hover {
-            transform: scale(1.1);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(166, 227, 161, 0.5), 0 0 15px rgba(137, 180, 250, 0.3);
+        }
+        #btn-yes:active {
+            transform: translateY(-1px) scale(0.98);
         }
         #btn-no { 
-            background-color: #f38ba8; 
-            color: #11111b; 
+            background: rgba(243, 139, 168, 0.1); 
+            color: #f38ba8; 
+            border: 1px solid rgba(243, 139, 168, 0.4);
             position: absolute; 
             left: 55%;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #btn-no:hover {
+            background: rgba(243, 139, 168, 0.2);
+            border-color: #f38ba8;
+            box-shadow: 0 4px 15px rgba(243, 139, 168, 0.2);
         }
         .hidden { 
             display: none !important; 
         }
+        /* Tebrik/Kutlama Ekranı */
         #success-msg { 
-            color: #a6e3a1; 
-            font-size: 1.5rem; 
-            margin-top: 20px; 
-            font-weight: bold; 
-            line-height: 1.5;
+            animation: cardReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .heart {
             color: #f38ba8;
-            font-size: 3rem;
-            animation: beat 1s infinite alternate;
+            font-size: 3.8rem;
+            margin-bottom: 20px;
+            animation: beat 0.8s infinite alternate cubic-bezier(0.25, 0.8, 0.25, 1);
+            filter: drop-shadow(0 0 15px rgba(243, 139, 168, 0.5));
+            display: inline-block;
         }
         @keyframes beat {
-            to { transform: scale(1.2); }
+            to { transform: scale(1.18); }
+        }
+        .success-text {
+            color: #a6e3a1; 
+            font-size: 1.4rem; 
+            font-weight: 500; 
+            line-height: 1.7;
+            text-shadow: 0 2px 10px rgba(166, 227, 161, 0.2);
+        }
+        
+        /* Gamified / Elite Başarımlar Kartı */
+        .achievements {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+        }
+        .achievements h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            color: #f9e2af;
+            text-align: center;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+        .achievement-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .achievement-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(243, 139, 168, 0.3);
+            transform: translateX(6px);
+        }
+        .achievement-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 8px rgba(243, 139, 168, 0.4));
+        }
+        .achievement-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .achievement-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #cdd6f4;
+        }
+        .achievement-desc {
+            font-size: 0.88rem;
+            color: rgba(205, 214, 244, 0.65);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+        /* Staggered animasyon tetikleyicisi */
+        .achievement-reveal {
+            animation: slideIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* MOBİL VE KÜÇÜK EKRANLAR İÇİN UYUMLULUK DÜZENLEMELERİ (Responsive) */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 0;
+            }
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 15px;
+            }
+            p {
+                font-size: 0.98rem;
+                min-height: 120px;
+                line-height: 1.7;
+                padding: 0;
+            }
+            .container {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+            #robot-img {
+                width: 130px;
+                height: 130px;
+            }
+            .buttons {
+                height: 70px;
+                gap: 15px;
+            }
+            button {
+                padding: 11px 26px;
+                font-size: 0.98rem;
+            }
+            .heart {
+                font-size: 3.2rem;
+            }
+            .success-text {
+                font-size: 1.15rem;
+                line-height: 1.6;
+            }
+            .achievements {
+                margin-top: 25px;
+                gap: 12px;
+            }
+            .achievements h3 {
+                font-size: 1.15rem;
+            }
+            .achievement-item {
+                padding: 12px 14px;
+                gap: 12px;
+                border-radius: 12px;
+            }
+            .achievement-icon {
+                font-size: 1.6rem;
+            }
+            .achievement-title {
+                font-size: 0.95rem;
+            }
+            .achievement-desc {
+                font-size: 0.78rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Partiküller için Canvas -->
+    <canvas id="ambient-canvas"></canvas>
+
     <div class="container" id="main-card">
+        <!-- Elinde Çiçek Tutan Sevimli Robot Görseli -->
+        <div class="robot-container">
+            <img src="robot.png" alt="Sevimli Robot" id="robot-img">
+        </div>
+
         <h1>Fatoş 🤍</h1>
         <p id="typing-text"></p>
         
@@ -99,14 +355,45 @@
 
         <div id="success-msg" class="hidden">
             <div class="heart">🤍</div>
-            Biliyordum!<br>
-            Seni çok seviyorum.<br>
-            Geleceğin en güzel, en harika sınıf öğretmeni sen olacaksın!
+            <div class="success-text">
+                Biliyordum!<br>
+                Seni çok seviyorum.<br>
+                Geleceğin en güzel, en harika sınıf öğretmeni sen olacaksın!
+            </div>
+            
+            <!-- Kişiselleştirilmiş Elite Başarım Listesi -->
+            <div class="achievements">
+                <h3>🏆 Başarımlar Kazanıldı!</h3>
+                
+                <div class="achievement-item">
+                    <span class="achievement-icon">💖</span>
+                    <div class="achievement-info">
+                        <span class="achievement-title">Ana Karakter (Main Character)</span>
+                        <span class="achievement-desc">Fatoş'un kalbi başarıyla geri kazanıldı.</span>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <span class="achievement-icon">🎓</span>
+                    <div class="achievement-info">
+                        <span class="achievement-title">Yılın Sınıf Öğretmeni</span>
+                        <span class="achievement-desc">Geleceğin en harika öğretmenine özel unvan açıldı.</span>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <span class="achievement-icon">🎮</span>
+                    <div class="achievement-info">
+                        <span class="achievement-title">Co-Op Modu Aktif</span>
+                        <span class="achievement-desc">Aptal tasarımcı affedildi, sonsuz macera devam ediyor.</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Ekranda daktilo efektiyle yazılacak özür metni
+        // Ekranda daktilo efektiyle yazılacak özür metni (Kesinlikle değiştirilmedi)
         const text = "Sevgilim, seni kırdığım için çok özür dilerim. Biliyorum, YKS maratonu zaten yeterince stresli ve hayallerine odaklandığın bu zorlu dönemde sana en büyük destekçi olmam gerekirken canını sıktım. Ama bilmeni isterim ki, tasarladığım hiçbir oyunun evreni sensiz anlamlı değil. Hayatımdaki en önemli 'main character' her zaman sensin. Lütfen bu aptal tasarımcıyı affet... Beni affediyor musun?";
         
         let i = 0;
@@ -118,7 +405,8 @@
                 i++;
                 setTimeout(typeWriter, speed);
             } else {
-                // Yazı bitince butonları göster
+                // Yazı bitince imleci kaldır ve butonları göster
+                document.getElementById("typing-text").classList.add("finished");
                 document.getElementById("action-buttons").classList.remove("hidden");
             }
         }
@@ -130,20 +418,286 @@
         const btnYes = document.getElementById("btn-yes");
         const actionButtons = document.getElementById("action-buttons");
         const successMsg = document.getElementById("success-msg");
+        const robotImg = document.getElementById("robot-img");
 
         // "Hayır" butonundan kaçma animasyonu
         btnNo.addEventListener("mouseover", () => {
-            const x = Math.random() * 200 - 100;
-            const y = Math.random() * 100 - 50;
+            const x = Math.random() * 260 - 130;
+            const y = Math.random() * 120 - 60;
             btnNo.style.transform = `translate(${x}px, ${y}px)`;
         });
 
+        // Sihirli Chime (Melodi) Sesi Üretici - Web Audio API
+        function playChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const now = audioCtx.currentTime;
+                
+                // C-Major 7th ve E-Minor arpej tonları (Mutluluk ve büyü hissi veren akorlar)
+                const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 659.25, 783.99, 987.77]; // C4, E4, G4, B4, C5, E5, G5, B5
+                
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.08);
+                    
+                    gainNode.gain.setValueAtTime(0.12, now + index * 0.08);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.6);
+                    
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    osc.start(now + index * 0.08);
+                    osc.stop(now + index * 0.08 + 0.6);
+                });
+            } catch (err) {
+                console.error("Ses çalma hatası:", err);
+            }
+        }
+
         // "Evet" butonuna tıklandığında olacaklar
-        btnYes.addEventListener("click", () => {
+        btnYes.addEventListener("click", (e) => {
+            // Sihirli sesi çal
+            playChime();
+
+            // Butonun koordinatlarını al ve oradan patlama efekti yap
+            const rect = btnYes.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            explode(x, y);
+
             actionButtons.classList.add("hidden");
             document.getElementById("typing-text").classList.add("hidden");
             successMsg.classList.remove("hidden");
+
+            // Robotun sevincini simüle etmek için büyüt ve döndür
+            if (robotImg) {
+                robotImg.style.transform = "scale(1.15) rotate(0deg)";
+                robotImg.style.borderColor = "#a6e3a1";
+                robotImg.style.boxShadow = "0 15px 45px rgba(166, 227, 161, 0.4), 0 0 35px rgba(166, 227, 161, 0.3)";
+            }
+
+            // Başarımları sırayla (staggered) göster
+            const items = document.querySelectorAll('.achievement-item');
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('achievement-reveal');
+                }, 600 + index * 300);
+            });
         });
+
+        // ==========================================
+        // CANVAS PARTİKÜL & IŞILTI SİSTEMİ
+        // ==========================================
+        const canvas = document.getElementById('ambient-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const maxParticles = 50;
+
+        class Particle {
+            constructor(type, x, y) {
+                this.type = type; // 'petal', 'bug', 'heart' veya 'sparkle'
+                this.x = x !== undefined ? x : Math.random() * width;
+                this.y = y !== undefined ? y : (x !== undefined ? y : Math.random() * height);
+                
+                if (type === 'petal') {
+                    this.size = Math.random() * 8 + 6;
+                    this.speedX = Math.random() * 1.2 - 0.6;
+                    this.speedY = Math.random() * 1.2 + 0.8;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.spin = Math.random() * 0.02 - 0.01;
+                    this.color = `rgba(${243 + Math.floor(Math.random() * 12)}, ${139 + Math.floor(Math.random() * 20)}, ${168 + Math.floor(Math.random() * 20)}, ${Math.random() * 0.4 + 0.35})`;
+                } else if (type === 'bug') {
+                    this.size = Math.random() * 2 + 1.2;
+                    this.speedX = Math.random() * 0.8 - 0.4;
+                    this.speedY = Math.random() * 0.8 - 0.4;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.color = `rgba(249, 226, 175, ${Math.random() * 0.5 + 0.3})`;
+                    this.glow = Math.random() * 0.04 + 0.015;
+                    this.opacity = Math.random();
+                    this.opacityDirection = Math.random() > 0.5 ? 1 : -1;
+                } else if (type === 'heart') {
+                    this.size = Math.random() * 12 + 8;
+                    this.speedX = Math.random() * 6 - 3;
+                    this.speedY = Math.random() * -6 - 2;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.spin = Math.random() * 0.05 - 0.025;
+                    this.color = `rgba(243, 139, 168, 1)`;
+                    this.alpha = 1;
+                } else if (type === 'sparkle') {
+                    this.size = Math.random() * 4 + 2;
+                    this.speedX = Math.random() * 1.6 - 0.8;
+                    this.speedY = Math.random() * -1.2 - 0.4; // yukarı süzül
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.spin = Math.random() * 0.1 - 0.05;
+                    const colors = ['rgba(249, 226, 175, 0.85)', 'rgba(243, 139, 168, 0.85)', 'rgba(203, 166, 247, 0.85)'];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                    this.alpha = 1;
+                }
+            }
+            
+            update(mouseX, mouseY) {
+                if (this.type === 'petal') {
+                    this.y += this.speedY;
+                    this.x += this.speedX + Math.sin(this.angle) * 0.3;
+                    this.angle += this.spin;
+                    
+                    if (this.y > height + 20) {
+                        this.y = -20;
+                        this.x = Math.random() * width;
+                    }
+                    if (this.x > width + 20) this.x = -20;
+                    if (this.x < -20) this.x = width + 20;
+                } else if (this.type === 'bug') {
+                    this.x += this.speedX + Math.sin(this.angle) * 0.15;
+                    this.y += this.speedY + Math.cos(this.angle) * 0.15;
+                    this.angle += 0.03;
+                    
+                    if (Math.random() < 0.02) {
+                        this.speedX = Math.random() * 0.8 - 0.4;
+                        this.speedY = Math.random() * 0.8 - 0.4;
+                    }
+                    
+                    this.opacity += this.glow * this.opacityDirection;
+                    if (this.opacity > 1 || this.opacity < 0.15) {
+                        this.opacityDirection *= -1;
+                    }
+                    
+                    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                        this.x = Math.random() * width;
+                        this.y = Math.random() * height;
+                    }
+                } else if (this.type === 'heart') {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.speedY += 0.12;
+                    this.alpha -= 0.015;
+                    this.angle += this.spin;
+                } else if (this.type === 'sparkle') {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.alpha -= 0.025;
+                    this.angle += this.spin;
+                    this.size *= 0.95; // Küçülerek yok ol
+                }
+                
+                // Fareye yaklaştığında partikülleri hafifçe itme efekti
+                if (mouseX !== undefined && mouseY !== undefined) {
+                    const dx = this.x - mouseX;
+                    const dy = this.y - mouseY;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120 && this.type !== 'heart' && this.type !== 'sparkle') {
+                        const force = (120 - dist) / 120 * 1.5;
+                        this.x += (dx / dist) * force;
+                        this.y += (dy / dist) * force;
+                    }
+                }
+            }
+            
+            draw() {
+                ctx.save();
+                if (this.type === 'petal') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(this.size, -this.size / 2, this.size, 0);
+                    ctx.quadraticCurveTo(this.size, this.size / 2, 0, 0);
+                    ctx.fill();
+                } else if (this.type === 'bug') {
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#f9e2af';
+                    ctx.fillStyle = `rgba(249, 226, 175, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'heart') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = `rgba(243, 139, 168, ${this.alpha})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-this.size/2, -this.size/2, -this.size, -this.size/4, 0, this.size);
+                    ctx.bezierCurveTo(this.size, -this.size/4, this.size/2, -this.size/2, 0, 0);
+                    ctx.fill();
+                } else if (this.type === 'sparkle') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = this.color.includes('249') ? '#f9e2af' : (this.color.includes('243') ? '#f38ba8' : '#cba6f7');
+                    ctx.fillStyle = this.color.replace('0.85', this.alpha);
+                    
+                    // 4 köşe sihirli parıltı yıldızı
+                    ctx.beginPath();
+                    for (let i = 0; i < 4; i++) {
+                        ctx.lineTo(0, -this.size);
+                        ctx.lineTo(this.size/3, -this.size/3);
+                        ctx.rotate(Math.PI / 2);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        // Başlangıç partiküllerini oluştur
+        for (let j = 0; j < maxParticles * 0.6; j++) {
+            particles.push(new Particle('petal'));
+        }
+        for (let j = 0; j < maxParticles * 0.4; j++) {
+            particles.push(new Particle('bug'));
+        }
+
+        let mouseX, mouseY;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Fare hareket ettikçe arkasında parıltılı yıldızlar bırak (kızlar bunu çok sever)
+            if (Math.random() < 0.35) {
+                particles.push(new Particle('sparkle', mouseX, mouseY));
+            }
+        });
+
+        // "Evet" tıklandığında kalp ve çiçek patlama fonksiyonu
+        function explode(x, y) {
+            for (let k = 0; k < 50; k++) {
+                particles.push(new Particle('heart', x, y));
+                particles.push(new Particle('petal', x, y));
+                particles.push(new Particle('sparkle', x, y));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let k = particles.length - 1; k >= 0; k--) {
+                const p = particles[k];
+                p.update(mouseX, mouseY);
+                p.draw();
+                
+                // Süresi dolan veya kaybolan partikülleri diziden çıkar
+                if ((p.type === 'heart' || p.type === 'sparkle') && p.alpha <= 0) {
+                    particles.splice(k, 1);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
